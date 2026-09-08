@@ -20,7 +20,7 @@ class GeocodeServiceException extends Exception
      */
     private $status;
 
-    public function __construct($message, $statusCode, $responseBody, Exception $previous = null)
+    public function __construct($message, $statusCode, $responseBody, ?Exception $previous = null)
     {
         parent::__construct($message, $statusCode, $previous);
         $responseBody = (string)$responseBody;
