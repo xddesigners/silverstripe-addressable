@@ -3,12 +3,19 @@
 namespace Symbiote\Addressable\Tests;
 
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Environment;
+use SilverStripe\ORM\Connect\MySQLDatabase;
+use SilverStripe\ORM\DB;
 use SilverStripe\Dev\SapphireTest;
 use Symbiote\Addressable\Geocodable;
 use Symbiote\Addressable\GoogleGeocodeService;
 
 class GeocodableTest extends SapphireTest
 {
+    protected static $extra_dataobjects = [
+        GeocodableTestObject::class,
+    ];
+
     protected static $use_draft_site = true;
 
     protected $usesDatabase = true;
@@ -18,7 +25,8 @@ class GeocodableTest extends SapphireTest
      */
     public function testUpdatingLatLngFromAddress()
     {
-        $record = new GeocodableDataObjectTest();
+        $this->requireGoogleApiKey();
+        $record = new GeocodableTestObject();
         $record->Address = '101-103 Courtenay Place';
         $record->Suburb = 'Wellington';
         $record->Postcode = '6011';
@@ -51,7 +59,8 @@ class GeocodableTest extends SapphireTest
      */
     public function testGetLastError()
     {
-        $record = new GeocodableDataObjectTest();
+        $this->requireGoogleApiKey();
+        $record = new GeocodableTestObject();
         $record->Address = '999 Non Existant Street';
         $record->Suburb = 'Dreaming';
         $record->Postcode = '9999';
@@ -81,9 +90,9 @@ class GeocodableTest extends SapphireTest
      */
     public function testDisableLatLngUpdate()
     {
-        Config::inst()->set(Geocodable::class, 'is_geocodable', false);
+        Config::modify()->set(Geocodable::class, 'is_geocodable', false);
 
-        $record = new GeocodableDataObjectTest();
+        $record = new GeocodableTestObject();
         $record->Address = '101-103 Courtenay Place';
         $record->Suburb = 'Wellington';
         $record->Postcode = '6011';
@@ -106,7 +115,7 @@ class GeocodableTest extends SapphireTest
      */
     public function testLatLngOverride()
     {
-        $record = new GeocodableDataObjectTest();
+        $record = new GeocodableTestObject();
         $record->Address = '101-103 Courtenay Place';
         $record->Suburb = 'Wellington';
         $record->Postcode = '6011';
@@ -133,7 +142,10 @@ class GeocodableTest extends SapphireTest
       */
     public function testIntendedTruncation()
     {
-        $record = new GeocodableDataObjectTest();
+        if (!DB::get_conn() instanceof MySQLDatabase) {
+            $this->markTestSkipped('DECIMAL(10,7) truncation is done by MySQL / MariaDB; other databases keep the full value.');
+        }
+        $record = new GeocodableTestObject();
         $record->Address = '101-103 Courtenay Place';
         $record->Suburb = 'Wellington';
         $record->Postcode = '6011';
@@ -149,7 +161,7 @@ class GeocodableTest extends SapphireTest
         // We re-retrieve the value as truncation only occurs when
         // a record is re-fetched from the database.
         //
-        $record = GeocodableDataObjectTest::get()->byID($record->ID);
+        $record = GeocodableTestObject::get()->byID($record->ID);
 
         $expected = [
            'lat' => -35.8182805,
@@ -159,5 +171,15 @@ class GeocodableTest extends SapphireTest
             $expected,
             ['lat' => $record->Lat, 'lng' => $record->Lng]
         );
+    }
+
+    /**
+     * These tests call the live Google Geocoding API.
+     */
+    private function requireGoogleApiKey(): void
+    {
+        if (!Environment::getEnv('GOOGLE_API_KEY')) {
+            $this->markTestSkipped('Set GOOGLE_API_KEY to run the live Google Geocoding API tests.');
+        }
     }
 }

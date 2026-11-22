@@ -9,11 +9,15 @@ use SilverStripe\i18n\Data\Intl\IntlLocales;
 
 class AddressableTest extends SapphireTest
 {
+    protected static $extra_dataobjects = [
+        AddressableTestObject::class,
+    ];
+
     protected $usesDatabase = true;
 
     public function testAddressableWrite()
     {
-        $silverStripe = new AddressableDataObjectTest();
+        $silverStripe = new AddressableTestObject();
         $silverStripe->Address = '101-103 Courtenay Place';
         $silverStripe->Suburb = 'Wellington';
         $silverStripe->Postcode = '6011';
@@ -23,7 +27,7 @@ class AddressableTest extends SapphireTest
 
         $this->assertTrue($silverStripeID > 0);
 
-        $dynamic = new AddressableDataObjectTest();
+        $dynamic = new AddressableTestObject();
         $dynamic->Address = '1526 South 12th Street';
         $dynamic->Suburb = 'Sheboygan';
         $dynamic->State = 'WI';
@@ -34,8 +38,8 @@ class AddressableTest extends SapphireTest
 
         $this->assertTrue($dynamicID > 0);
 
-        $addressable = AddressableDataObjectTest::get()->byID($silverStripeID);
-        $addressable2 = AddressableDataObjectTest::get()->byID($dynamicID);
+        $addressable = AddressableTestObject::get()->byID($silverStripeID);
+        $addressable2 = AddressableTestObject::get()->byID($dynamicID);
 
 
         $this->assertTrue($addressable->Address == '101-103 Courtenay Place');
@@ -56,7 +60,7 @@ class AddressableTest extends SapphireTest
      */
     public function testConfigureNoCountry()
     {
-        $record = new AddressableDataObjectTest();
+        $record = new AddressableTestObject();
 
         // Test that nothing is populated by default
         // (we only populate if 1 item is defined in the list)
@@ -77,10 +81,10 @@ class AddressableTest extends SapphireTest
      */
     public function testConfigureOneCountryGlobally()
     {
-        Config::inst()->set(Addressable::class, 'allowed_countries', [
+        Config::modify()->set(Addressable::class, 'allowed_countries', [
             'au' => 'Australia',
         ]);
-        $record = new AddressableDataObjectTest();
+        $record = new AddressableTestObject();
 
         // Test that populateDefaults() is working
         $this->assertEquals(
@@ -99,10 +103,10 @@ class AddressableTest extends SapphireTest
 
     public function testConfigureOneCountryOnExtendable()
     {
-        Config::inst()->set(AddressableDataObjectTest::class, 'allowed_countries', [
+        Config::modify()->set(AddressableTestObject::class, 'allowed_countries', [
             'nz' => 'New Zealand',
         ]);
-        $record = new AddressableDataObjectTest();
+        $record = new AddressableTestObject();
 
         // Test that populateDefaults() is working
         $this->assertEquals(
@@ -121,10 +125,10 @@ class AddressableTest extends SapphireTest
 
     public function testConfigureOneStateGlobally()
     {
-        Config::inst()->set(Addressable::class, 'allowed_states', [
+        Config::modify()->set(Addressable::class, 'allowed_states', [
             'vic' => 'Victoria',
         ]);
-        $record = new AddressableDataObjectTest();
+        $record = new AddressableTestObject();
 
         // Test that populateDefaults() is working
         $this->assertEquals(
@@ -143,10 +147,10 @@ class AddressableTest extends SapphireTest
 
     public function testConfigureOneStateOnExtendable()
     {
-        Config::inst()->set(AddressableDataObjectTest::class, 'allowed_states', [
+        Config::modify()->set(AddressableTestObject::class, 'allowed_states', [
             'nsw' => 'New South Wales',
         ]);
-        $record = new AddressableDataObjectTest();
+        $record = new AddressableTestObject();
 
         // Test that populateDefaults() is working
         $this->assertEquals(

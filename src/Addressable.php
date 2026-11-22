@@ -85,7 +85,7 @@ class Addressable extends Extension
         $fields->merge($this->getAddressFields());
     }
 
-    public function populateDefaults()
+    protected function onAfterPopulateDefaults(): void
     {
         $allowedStates = $this->owner->getAllowedStates();
         if (is_array($allowedStates) &&

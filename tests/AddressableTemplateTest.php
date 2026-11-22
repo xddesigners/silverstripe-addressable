@@ -2,12 +2,16 @@
 
 namespace Symbiote\Addressable\Tests;
 
-use Symbiote\Addressable\GeocodeService;
+use Symbiote\Addressable\GoogleGeocodeService;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
 
 class AddressableTemplateTest extends SapphireTest
 {
+    protected static $extra_dataobjects = [
+        AddressableTestObject::class,
+    ];
+
     /**
      * This is a mock key that resembles a real Google Map API key
      */
@@ -20,9 +24,9 @@ class AddressableTemplateTest extends SapphireTest
         // This is **not** a real key.
         // This is to test that the key gets put into the embeddable map properly.
         //
-        Config::inst()->set(GeocodeService::class, 'google_api_key', self::FAKE_GOOGLE_MAP_API_KEY);
+        Config::modify()->set(GoogleGeocodeService::class, 'google_api_key', self::FAKE_GOOGLE_MAP_API_KEY);
 
-        $record = new AddressableDataObjectTest();
+        $record = new AddressableTestObject();
         $record->Address = '101-103 Courtenay Place';
         $record->Suburb = 'Wellington';
         $record->Postcode = '6011';

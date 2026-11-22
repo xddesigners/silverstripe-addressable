@@ -1,4 +1,6 @@
 # Contributing
 
-For information on contributing, please visit:
-[https://www.symbiote.com.au/contributing-open-source](https://www.symbiote.com.au/contributing-open-source)
+Issues and pull requests are welcome at https://github.com/xddesigners/silverstripe-addressable.
+
+Run the tests with `vendor/bin/phpunit` (set `GOOGLE_API_KEY` to include the live Google Geocoding API tests) and the
+code style check with `vendor/bin/phpcs src tests`.
